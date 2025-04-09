@@ -2,15 +2,22 @@ alert("Its working sire");
 
 const pokeUrl = "https://pokeapi.co/api/v2";
 
-// Able to see data about pikachu
+fetchData();
 
-fetch("https://pokeapi.co/api/v2/pokemon/pikachu")
-    .then(response => {
-        // error handling 
+async function fetchData(){
+
+    try{
+        const response = await fetch("https://pokeapi.co/api/v2/pokemon/pikachu"); 
+        
         if(!response.ok){
-            throw new Error('Could not find data');
+            throw new Error('Invalid Pokemon data');
         }
-        return response.json()
-    })
-    .then(data => console.log(data.name))
-    .catch(error => console.error(error));
+        const data = await response.json()
+        console.log(data);
+
+    }
+    catch(error){
+        console.log(error);
+    }
+}
+
