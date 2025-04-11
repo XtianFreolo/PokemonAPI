@@ -19,9 +19,20 @@ async function fetchRandomPokemon(){
 
         const pokemonImage = data.sprites.front_default;
         const imgElement = document.getElementById("pokemonImage");
-
         imgElement.src = pokemonImage;
         imgElement.style.display = "block";
+
+        const pokemonName = data.name.charAt(0).toUpperCase() + data.name.slice(1);
+        const nameElement = document.getElementById("pokemonTypes");
+        nameElement.textContent = `Name: ${pokemonName}`;
+
+        const types = data.types.map(typeInfo => typeInfo.type.name).join(',');
+        const typesElement = document.getElementById("pokemonTypes");
+        typesElement.textContent = `Types: ${types}`;
+
+        const abilities = data.abilities.map(abilityInfo => abilityInfo.ability.name).join(',');
+        const abilitiesElement = document.getElementById("pokemonAbilities"); 
+        abilitiesElement.textContent = `Abilities: ${abilities}`;
 
     }
     catch(error) {
