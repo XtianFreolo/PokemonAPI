@@ -3,15 +3,15 @@ alert("Its working sire");
 const pokeUrl = "https://pokeapi.co/api/v2";
 
 
-async function fetchRandomPokemon(){
+async function fetchRandomPokemon() {
 
-    try{
+    try {
         // This shoukd get a random number from pokedex. +1 is bulbasaur
         const randomId = Math.floor(Math.random() * 898) + 1;
         // Should get randomId in pokeUrl
-        const response = await fetch(`${pokeUrl}/pokemon/${randomId}`); 
-        
-        if(!response.ok){
+        const response = await fetch(`${pokeUrl}/pokemon/${randomId}`);
+
+        if (!response.ok) {
             throw new Error('Invalid Pokemon data');
         }
 
@@ -23,7 +23,7 @@ async function fetchRandomPokemon(){
         imgElement.style.display = "block";
 
         const pokemonName = data.name.charAt(0).toUpperCase() + data.name.slice(1);
-        const nameElement = document.getElementById("pokemonTypes");
+        const nameElement = document.getElementById("pokemonName");
         nameElement.textContent = `Name: ${pokemonName}`;
 
         const types = data.types.map(typeInfo => typeInfo.type.name).join(',');
@@ -31,11 +31,11 @@ async function fetchRandomPokemon(){
         typesElement.textContent = `Types: ${types}`;
 
         const abilities = data.abilities.map(abilityInfo => abilityInfo.ability.name).join(',');
-        const abilitiesElement = document.getElementById("pokemonAbilities"); 
+        const abilitiesElement = document.getElementById("pokemonAbilities");
         abilitiesElement.textContent = `Abilities: ${abilities}`;
 
     }
-    catch(error) {
+    catch (error) {
         console.log(error);
     }
 }
