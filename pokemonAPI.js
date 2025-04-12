@@ -4,7 +4,7 @@ const pokeUrl = "https://pokeapi.co/api/v2";
 
 async function fetchAllPokemon() {
 
-    const allPokemon = [];
+    const allPokemonUrl = [];
     // Should get all pokimans from pokeUrl
     let nextUrl = `${pokeUrl}/pokemon?limit=898`;
 
@@ -21,50 +21,91 @@ async function fetchAllPokemon() {
             // if response is okay, convert to json file
             const data = await response.json();
             // push data into an array
-            allPokemon.push(...data.results);
+            allPokemonUrl.push(...data.results);
+
+            // check if theres another page of results
+            nextUrl = data.next;
         }
+        return allPokemonUrl;
+
+    } catch(error) {
+        console.error('Error fetching Pokemon List:', error);
     }
 }
 
 
-
-
-
+// function to get randompokemon
 async function fetchRandomPokemon() {
 
     try {
-        // This should get a random number from pokedex. +1 is bulbasaur
-        const randomId = Math.floor(Math.random() * 898) + 1;
-        // Should get randomId in pokeUrl
-        const response = await fetch(`${pokeUrl}/pokemon/${randomId}`);
+        const allPokemon = await fetchAllPokemon();
+        const randomPokemonIds = getRandomPokemonIds(3,allPokemon.length);
 
-        if (!response.ok) {
-            throw new Error('Invalid Pokemon data');
-        }
 
-        const data = await response.json();
+        // Fetch data for three random Pokémon
+        const pokemonDataPromises = randomPokemonIds.map(id => fetch(allPokemon[id].url).then(res => res.json()));
+        const pokemonData = await Promise.all(pokemonDataPromises);
+        const pokemonContainer = document.getElementById("pokemonContainer");
 
-        const pokemonImage = data.sprites.front_default;
-        const imgElement = document.getElementById("pokemonImage");
-        imgElement.src = pokemonImage;
-        imgElement.style.display = "block";
+        pokemonContainer.innerHTML = "<p> Loading Pokimans...</p>";
+        pokemonContainer.innerHTML = "";
 
-        const pokemonName = data.name.charAt(0).toUpperCase() + data.name.slice(1);
-        const nameElement = document.getElementById("pokemonName");
-        nameElement.textContent = `Name: ${pokemonName}`;
 
-        const types = data.types.map(typeInfo => typeInfo.type.name).join(',');
-        const typesElement = document.getElementById("pokemonTypes");
-        typesElement.textContent = `Types: ${types}`;
+        // Once we have the data, log each Pokémon's basic info
+        pokemonData.forEach(async (pokemon) => {
+            console.log(`${pokemon.name}:`);
 
-        const abilities = data.abilities.map(abilityInfo => abilityInfo.ability.name).join(',');
-        const abilitiesElement = document.getElementById("pokemonAbilities");
-        abilitiesElement.textContent = `Abilities: ${abilities}`;
 
-    }
-    catch (error) {
-        console.log(error);
+
+            // Get the species URL from the Pokémon data
+            const speciesUrl = pokemon.species.url;
+            const speciesResponse = await fetch(speciesUrl);
+            const speciesData = await speciesResponse.json();
+
+            // Find the flavor text entry in English
+            const englishDescription = speciesData.flavor_text_entries.find(entry => entry.language.name === 'en');
+
+            const pokemonInfo = document.createElement("div");
+            pokemonInfo.setAttribute("class", "pokemon-info");
+
+            const pokemonName = document.createElement("h2");
+            pokemonName.setAttribute("class", "pokemon-name");
+            pokemonName.textContent = pokemon.name.charAt(0).toUpperCase() + pokemon.name.slice(1);
+
+            const pokemonDescription = document.createElement("p");
+            pokemonDescription.setAttribute("class", "pokemon-description");
+            pokemonDescription.textContent = englishDescription ? englishDescription.flavor_text : "No English description found.";
+            const pokemonImage = document.createElement("img");
+            pokemonImage.src = pokemon.sprites.front_default;
+
+            pokemonInfo.append(pokemonName, pokemonDescription, pokemonImage);
+            pokemonContainer.appendChild(pokemonInfo);
+
+            if (englishDescription) {
+                console.log(`${pokemon.name}: ${englishDescription.flavor_text}`);
+            } else {
+                console.log(`${pokemon.name}: No English description found.`);
+            }
+            console.log('------------------------');
+        });
+    } catch (error) {
+        console.error('Error fetching Pokémon details:', error);
     }
 }
-// event listener for interactive button 
-document.getElementById("randomPokemonButton").addEventListener("click", fetchRandomPokemon);
+
+// Helper function to get 3 random Pokémon IDs
+function getRandomPokemonIds(num, maxId) {
+    const ids = [];
+    while (ids.length < num) {
+        const randomId = Math.floor(Math.random() * maxId);
+        if (!ids.includes(randomId)) {
+            ids.push(randomId);
+        }
+    }
+    return ids;
+}
+
+document.getElementById("randomPokemonButton").addEventListener("click", () => {
+    console.log("Button clicked!");
+    fetchRandomPokemon();
+});
