@@ -2,11 +2,38 @@ alert("Its working sire");
 
 const pokeUrl = "https://pokeapi.co/api/v2";
 
+async function fetchAllPokemon() {
+
+    const allPokemon = [];
+    // Should get all pokimans from pokeUrl
+    let nextUrl = `${pokeUrl}/pokemon?limit=898`;
+
+
+    try {
+        while (nextUrl) {
+            const response = await fetch(nextUrl);
+            // Error handling for invalid response
+
+            if (!response.ok) {
+                throw new Error('Failed to fetch Pokemon data');
+            }
+
+            // if response is okay, convert to json file
+            const data = await response.json();
+            // push data into an array
+            allPokemon.push(...data.results);
+        }
+    }
+}
+
+
+
+
 
 async function fetchRandomPokemon() {
 
     try {
-        // This shoukd get a random number from pokedex. +1 is bulbasaur
+        // This should get a random number from pokedex. +1 is bulbasaur
         const randomId = Math.floor(Math.random() * 898) + 1;
         // Should get randomId in pokeUrl
         const response = await fetch(`${pokeUrl}/pokemon/${randomId}`);
